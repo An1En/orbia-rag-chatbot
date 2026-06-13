@@ -1,5 +1,6 @@
 {
   "version": 2,
+  "installCommand": "pip install -r api/requirements.txt",
   "routes": [
     { "src": "/ask", "dest": "/api/index.py" },
     { "src": "/health", "dest": "/api/index.py" },
