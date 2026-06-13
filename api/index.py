@@ -1,27 +1,10 @@
-"""
-FASTAPI BACKEND FOR VERCEL
-==========================
-This is the Vercel serverless function entry point.
-Vercel detects api/index.py and runs it as a FastAPI app.
-
-Vercel Python runtime: @vercel/python
-Entry point: api/index.py → app (the FastAPI instance)
-"""
-
 import os
-import sys
-
-# Add parent directory to path so we can import from api/
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles
-from pydantic import BaseModel
-import uvicorn
-
 from fastapi.responses import FileResponse
-from api.vercel_rag import answer_question
+from pydantic import BaseModel
+
+from .vercel_rag import answer_question
 
 # ─── PATHS ───────────────────────────────────────────────────
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -105,7 +88,4 @@ def ask_question(request: QueryRequest):
     )
     return QueryResponse(**result)
 
-# ─── RUN LOCALLY ─────────────────────────────────────────────
-if __name__ == "__main__":
-    """Run with: python api/index.py"""
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
