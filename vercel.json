@@ -1,9 +1,7 @@
 {
   "version": 2,
-  "installCommand": "pip install -r api/requirements.txt",
   "functions": {
     "api/index.py": {
-      "runtime": "@vercel/python@4.7.0",
       "maxDuration": 30,
       "memory": 512
     }
