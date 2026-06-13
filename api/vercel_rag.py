@@ -147,20 +147,13 @@ def add_sources(answer, results):
 
 
 def get_query_embedding(text, hf_token=None):
-    """
-    Convert text to a 384-dim vector using HuggingFace Inference API.
-    Uses the same all-MiniLM-L6-v2 model used during local ingestion.
-    
-    Falls back to environment variable HF_TOKEN if no token is passed.
-    """
     token = hf_token or os.environ.get("HF_TOKEN")
-
     headers = {}
     if token:
         headers["Authorization"] = f"Bearer {token}"
 
     try:
-        with httpx.Client(timeout=30) as client:
+        with httpx.Client(timeout=60) as client:
             response = client.post(
                 HF_EMBEDDING_URL,
                 headers=headers,
@@ -183,43 +176,35 @@ def get_query_embedding(text, hf_token=None):
         return None
 
 
+def keyword_retrieve(question, chunks, top_k=5):
+    question_lower = question.lower()
+    question_words = [w for w in question_lower.split() if len(w) > 3]
+    scored = []
+    for chunk in chunks:
+        text_lower = chunk["text"].lower()
+        matches = sum(1 for word in question_words if word in text_lower)
+        scored.append((matches, chunk))
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [{"score": s, "chunk": c} for s, c in scored[:top_k]]
+
+
 def answer_question(question, api_key=None, top_k=5):
-    """
-    Full RAG pipeline: retrieve -> context -> generate -> format.
-    
-    Args:
-        question: The user's question
-        api_key: Groq API key (optional, enables LLM answers)
-        top_k: Number of chunks to retrieve
-    
-    Returns:
-        dict with 'answer', 'sources', and 'fallback' flag
-    """
-    # 1. Load chunks
     chunks = load_embeddings()
 
-    # 2. Compute query embedding
     query_emb = get_query_embedding(question)
 
-    if query_emb is None:
-        # Embedding API unavailable - fall back to keyword matching
-        all_text = "\n".join(c["text"][:300] for c in chunks)
-        fallback_answer = generate_fallback(all_text, question)
-        return {"answer": fallback_answer, "sources": [], "fallback": True}
+    if query_emb is not None:
+        results = retrieve(query_emb, chunks, top_k=top_k)
+    else:
+        results = keyword_retrieve(question, chunks, top_k=top_k)
 
-    # 3. Retrieve relevant chunks
-    results = retrieve(query_emb, chunks, top_k=top_k)
-
-    # 4. Format context
     context = format_context(results)
 
-    # 5. Generate answer via Groq (or fallback)
     answer = generate_answer(context, question, api_key)
     fallback_used = False
     if answer is None:
         answer = generate_fallback(context, question)
         fallback_used = True
-        # Return plain answer without sources formatting for fallback
         sources = []
         for r in results:
             source = r["chunk"].get("metadata", {}).get("source", "Unknown")
@@ -230,10 +215,7 @@ def answer_question(question, api_key=None, top_k=5):
             "fallback": True,
         }
 
-    # 6. Format with sources
     full_answer = add_sources(answer, results)
-
-    # 7. Extract source names
     sources = []
     for r in results:
         source = r["chunk"].get("metadata", {}).get("source", "Unknown")
