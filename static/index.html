@@ -522,7 +522,7 @@
             document.getElementById('loading')?.remove();
             let answerHtml = data.answer.replace(/\n/g, '<br>');
             if (data.fallback) {
-                answerHtml = `<div class="fallback-badge">Using keyword matching (Groq API key not configured server-side)</div>` + answerHtml;
+                answerHtml = `<div class="fallback-badge">Using keyword matching (LLM API key not configured server-side)</div>` + answerHtml;
             }
             addMessage('assistant', answerHtml);
         } catch (error) {

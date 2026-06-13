@@ -12,7 +12,7 @@ import os
 import httpx
 
 EMBEDDINGS_PATH = os.path.join(os.path.dirname(__file__), "embeddings.json")
-GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 
 
 def load_embeddings():
@@ -33,7 +33,8 @@ def format_context(results):
 
 
 def generate_answer(context, question, api_key):
-    """Call Groq Llama 3 to generate an answer from the context."""
+    """Call OpenRouter (free LLM) to generate an answer from the context."""
+    api_key = api_key or os.environ.get("OPENROUTER_API_KEY")
     if not api_key:
         return None
 
@@ -56,13 +57,15 @@ ANSWER:"""
     try:
         with httpx.Client(timeout=30) as client:
             response = client.post(
-                GROQ_API_URL,
+                OPENROUTER_API_URL,
                 headers={
                     "Authorization": f"Bearer {api_key}",
                     "Content-Type": "application/json",
+                    "HTTP-Referer": "https://orbia-rag-chatbot.vercel.app",
+                    "X-Title": "Orbia RAG Chatbot",
                 },
                 json={
-                    "model": "llama3-8b-8192",
+                    "model": "meta-llama/llama-3-8b-instruct",
                     "messages": [
                         {"role": "system", "content": "You are a helpful AI assistant."},
                         {"role": "user", "content": system_prompt},
@@ -75,7 +78,7 @@ ANSWER:"""
             data = response.json()
             return data["choices"][0]["message"]["content"]
     except Exception as e:
-        print(f"[ERROR] Groq API call failed: {e}")
+        print(f"[ERROR] OpenRouter API call failed: {e}")
         return None
 
 

@@ -80,10 +80,10 @@ def ask_question(request: QueryRequest):
         "fallback": false
     }
     """
-    groq_key = os.environ.get("GROQ_API_KEY")
+    api_key = os.environ.get("OPENROUTER_API_KEY") or os.environ.get("GROQ_API_KEY")
     result = answer_question(
         question=request.question,
-        api_key=groq_key,
+        api_key=api_key,
         top_k=request.top_k,
     )
     return QueryResponse(**result)
