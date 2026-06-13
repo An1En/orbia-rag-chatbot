@@ -102,20 +102,6 @@ def generate_fallback(context, question):
         return "I don't have enough information about that in my knowledge base."
 
 
-def add_sources(answer, results):
-    """Append source citations to the answer."""
-    result = answer + "\n\n**Sources:**\n"
-    seen = set()
-    for i, r in enumerate(results, 1):
-        source = r["chunk"].get("metadata", {}).get("source", "Unknown")
-        source_name = os.path.basename(source)
-        if source_name not in seen:
-            seen.add(source_name)
-            preview = r["chunk"]["text"][:100].replace("\n", " ").strip()
-            result += f"[{i}] {source_name}\n    _{preview}..._\n\n"
-    return result
-
-
 def keyword_retrieve(question, chunks, top_k=5):
     question_lower = question.lower()
     question_words = [w for w in question_lower.split() if len(w) > 3]
@@ -148,14 +134,13 @@ def answer_question(question, api_key=None, top_k=5):
             "fallback": True,
         }
 
-    full_answer = add_sources(answer, results)
     sources = []
     for r in results:
         source = r["chunk"].get("metadata", {}).get("source", "Unknown")
         sources.append(os.path.basename(source))
 
     return {
-        "answer": full_answer,
+        "answer": answer,
         "sources": list(dict.fromkeys(sources)),
         "fallback": False,
     }
