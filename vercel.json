@@ -1,8 +1,5 @@
 {
-  "$schema": "https://openapi.vercel.sh/vercel.json",
   "version": 2,
-  "buildCommand": null,
-  "outputDirectory": "static",
   "installCommand": "pip install -r api/requirements.txt",
   "functions": {
     "api/index.py": {
@@ -12,17 +9,8 @@
     }
   },
   "routes": [
-    {
-      "src": "/ask",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/health",
-      "dest": "/api/index.py"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/static/index.html"
-    }
+    { "src": "/ask", "dest": "/api/index.py" },
+    { "src": "/health", "dest": "/api/index.py" },
+    { "src": "/", "dest": "/api/index.py" }
   ]
 }
