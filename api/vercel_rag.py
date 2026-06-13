@@ -27,7 +27,7 @@ def format_context(results):
         metadata = r["chunk"].get("metadata", {})
         source = metadata.get("source", "Orbia Document")
         source_name = os.path.basename(source) if source != "Orbia Document" else "Orbia Document"
-        text = r["chunk"]["text"][:500]
+        text = r["chunk"]["text"][:1000]
         context_parts.append(f"[{i}] Source: {source_name}\n{text}")
     return "\n---\n".join(context_parts)
 
@@ -101,9 +101,10 @@ def generate_fallback(context, question):
         return "I don't have enough information about that in my knowledge base."
 
 
-def keyword_retrieve(question, chunks, top_k=5):
+def keyword_retrieve(question, chunks, top_k=10):
     question_lower = question.lower()
-    question_words = [w for w in question_lower.split() if len(w) > 3]
+    stop_words = {"the","a","an","is","are","was","were","in","on","at","to","for","of","and","or","how","what","who","when","where","why","do","does","did","can","will","would","could","should","may","might","this","that","it","its","with","as","be","by","from","has","have","had","not","no","but","so","if","about"}
+    question_words = [w for w in question_lower.split() if w not in stop_words]
     scored = []
     for chunk in chunks:
         text_lower = chunk["text"].lower()
