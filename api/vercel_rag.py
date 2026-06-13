@@ -38,17 +38,16 @@ def generate_answer(context, question, api_key):
     if not api_key:
         return None
 
-    system_prompt = f"""You are an AI assistant specialized in answering questions about Orbia, a global materials company. Your role is to provide accurate, helpful information based ONLY on the context provided below.
+    system_prompt = f"""You are an AI assistant specialized in answering questions about Orbia, a global materials company. Answer the user's question using BOTH the context below AND your general knowledge about Orbia.
 
-CONTEXT:
+CONTEXT (scraped from Orbia's website and reports):
 {context}
 
-RULES:
-1. Answer ONLY using the information in the CONTEXT above. If the context doesn't contain enough information to fully answer the question, say "I don't have enough information about that in my knowledge base."
-2. Never make up or hallucinate information.
-3. Be concise and professional.
-4. When relevant, mention which Orbia business group or area the information relates to.
-5. If the user asks about something outside Orbia, politely redirect to Orbia-related topics.
+GUIDELINES:
+1. Use the context first, but if it's missing details, supplement with your own knowledge about Orbia.
+2. If you're unsure about something, say so — don't make things up.
+3. Be thorough and detailed in your answers.
+4. If the user asks about something outside Orbia, politely redirect to Orbia-related topics.
 
 USER QUESTION: {question}
 
@@ -70,8 +69,8 @@ ANSWER:"""
                         {"role": "system", "content": "You are a helpful AI assistant."},
                         {"role": "user", "content": system_prompt},
                     ],
-                    "temperature": 0.2,
-                    "max_tokens": 500,
+                    "temperature": 0.3,
+                    "max_tokens": 800,
                 },
             )
             response.raise_for_status()
@@ -114,7 +113,7 @@ def keyword_retrieve(question, chunks, top_k=5):
     return [{"score": s, "chunk": c} for s, c in scored[:top_k]]
 
 
-def answer_question(question, api_key=None, top_k=5):
+def answer_question(question, api_key=None, top_k=10):
     chunks = load_embeddings()
     results = keyword_retrieve(question, chunks, top_k=top_k)
     context = format_context(results)

@@ -109,9 +109,11 @@ def scrape_orbia_pages():
     pages = [
         ("https://www.orbia.com/this-is-orbia/", "orbia_overview.txt"),
         ("https://www.orbia.com/this-is-orbia/business-groups/", "orbia_business_groups.txt"),
+        ("https://www.orbia.com/this-is-orbia/leadership/", "orbia_leadership.txt"),
         ("https://www.orbia.com/careers/", "orbia_careers.txt"),
         ("https://www.orbia.com/careers/how-we-hire/", "orbia_how_we_hire.txt"),
         ("https://www.orbia.com/investor-relations/", "orbia_investor_relations.txt"),
+
     ]
     
     print("=" * 60)

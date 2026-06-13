@@ -30,7 +30,7 @@ app.add_middleware(
 class QueryRequest(BaseModel):
     """The shape of data the frontend sends to /ask"""
     question: str
-    top_k: int = 5               # Number of documents to retrieve
+    top_k: int = 8               # Number of documents to retrieve
 
 class QueryResponse(BaseModel):
     """The shape of data the API returns"""
