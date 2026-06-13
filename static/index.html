@@ -434,9 +434,8 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.3);
             z-index: 8;
-            backdrop-filter: blur(4px);
         }
         .sidebar-overlay.active { display: block; }
 
@@ -537,6 +536,11 @@
         document.getElementById('sidebarOverlay').classList.toggle('active');
     }
 
+    function closeSidebar() {
+        document.querySelector('.sidebar').classList.remove('open');
+        document.getElementById('sidebarOverlay').classList.remove('active');
+    }
+
     document.addEventListener('DOMContentLoaded', function() {
         addMessage('assistant', 'Hello! I\'m the Orbia Knowledge Assistant. Ask me anything about Orbia\'s business, purpose, technology, or culture!');
     });
@@ -560,6 +564,7 @@
         const question = input.value.trim();
         if (!question) return;
         input.value = '';
+        closeSidebar();
         addMessage('user', question);
         fetchAnswer(question);
     }
@@ -567,6 +572,7 @@
     function askSample(question) {
         if (isLoading) return;
         document.getElementById('questionInput').value = '';
+        closeSidebar();
         addMessage('user', question);
         fetchAnswer(question);
     }
